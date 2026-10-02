@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": null,
+    "after": {
+      "ID": 9004,
+      "REGION": "DEU",
+      "NAME_COL": "Deutsch Test",
+      "PROBLEM_COL": "Grüße aus München"
+    },
+    "op": "c",
+    "snapshot": "false"
+  }
+}

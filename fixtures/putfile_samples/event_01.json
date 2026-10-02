@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": null,
+    "after": {
+      "ID": 9002,
+      "REGION": "SYZ",
+      "NAME_COL": "中文测试",
+      "PROBLEM_COL": "简体中文混合测试"
+    },
+    "op": "c",
+    "snapshot": "false"
+  }
+}

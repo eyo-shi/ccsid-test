@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": null,
+    "after": {
+      "ID": 9005,
+      "REGION": "TUR",
+      "NAME_COL": "İstanbul",
+      "PROBLEM_COL": "Türkçe karakter: ğüşıöç"
+    },
+    "op": "c",
+    "snapshot": "false"
+  }
+}

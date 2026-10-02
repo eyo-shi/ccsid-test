@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": {
+      "ID": 9100,
+      "REGION": "SYZ",
+      "NAME_COL": "中文测试",
+      "PROBLEM_COL": "UPDATE確認"
+    },
+    "after": null,
+    "op": "d",
+    "snapshot": "false"
+  }
+}

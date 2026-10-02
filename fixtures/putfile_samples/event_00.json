@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": null,
+    "after": {
+      "ID": 9001,
+      "REGION": "JPN",
+      "NAME_COL": "日本語テスト",
+      "PROBLEM_COL": "混合文字列：日本語・English・123"
+    },
+    "op": "c",
+    "snapshot": "false"
+  }
+}

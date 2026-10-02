@@ -1,0 +1,13 @@
+{
+  "payload": {
+    "before": null,
+    "after": {
+      "ID": 9003,
+      "REGION": "KOR",
+      "NAME_COL": "한국어테스트",
+      "PROBLEM_COL": "한글 혼합 테스트"
+    },
+    "op": "c",
+    "snapshot": "false"
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9001, "REGION": "JPN", "NAME_COL": "日本語テスト", "PROBLEM_COL": "混合文字列：日本語・English・123"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9002, "REGION": "SYZ", "NAME_COL": "中文测试", "PROBLEM_COL": "简体中文混合测试"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9003, "REGION": "KOR", "NAME_COL": "한국어테스트", "PROBLEM_COL": "한글 혼합 테스트"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9004, "REGION": "DEU", "NAME_COL": "Deutsch Test", "PROBLEM_COL": "Grüße aus München"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9005, "REGION": "TUR", "NAME_COL": "İstanbul", "PROBLEM_COL": "Türkçe karakter: ğüşıöç"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9006, "REGION": "USA", "NAME_COL": "Hello World", "PROBLEM_COL": "English mixed 123"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": null,
+      "after": {"ID": 9100, "REGION": "SYZ", "NAME_COL": "中文测试", "PROBLEM_COL": "INSERT確認"},
+      "op": "c",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": {"ID": 9100, "REGION": "SYZ", "NAME_COL": "中文测试", "PROBLEM_COL": "INSERT確認"},
+      "after": {"ID": 9100, "REGION": "SYZ", "NAME_COL": "中文测试", "PROBLEM_COL": "UPDATE確認"},
+      "op": "u",
+      "snapshot": "false"
+    }
+  },
+  {
+    "payload": {
+      "before": {"ID": 9100, "REGION": "SYZ", "NAME_COL": "中文测试", "PROBLEM_COL": "UPDATE確認"},
+      "after": null,
+      "op": "d",
+      "snapshot": "false"
+    }
+  }
+]

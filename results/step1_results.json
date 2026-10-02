@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "timestamp": "2026-10-02T17:33:08+09:00",
+    "hostname": "LK4C5V492J",
+    "mode": "verify",
+    "db2_container": null,
+    "putfile_dir": "fixtures/putfile_samples",
+    "pass": 9,
+    "fail": 0,
+    "wait": 0
+  },
+  "results": [
+    {
+      "case_id": "REG-JPN",
+      "category": "多言語 UTF-8 保持",
+      "description": "JPN INSERT (op:c)",
+      "expected": "日本語テスト / 混合文字列：日本語・English・123",
+      "actual": "日本語テスト / 混合文字列：日本語・English・123",
+      "status": "PASS",
+      "note": "file=event_00.json",
+      "source_file": "fixtures/putfile_samples/event_00.json"
+    },
+    {
+      "case_id": "REG-SYZ",
+      "category": "多言語 UTF-8 保持",
+      "description": "SYZ INSERT (op:c)",
+      "expected": "中文测试 / 简体中文混合测试",
+      "actual": "中文测试 / 简体中文混合测试",
+      "status": "PASS",
+      "note": "file=event_01.json",
+      "source_file": "fixtures/putfile_samples/event_01.json"
+    },
+    {
+      "case_id": "REG-KOR",
+      "category": "多言語 UTF-8 保持",
+      "description": "KOR INSERT (op:c)",
+      "expected": "한국어테스트 / 한글 혼합 테스트",
+      "actual": "한국어테스트 / 한글 혼합 테스트",
+      "status": "PASS",
+      "note": "file=event_02.json",
+      "source_file": "fixtures/putfile_samples/event_02.json"
+    },
+    {
+      "case_id": "REG-DEU",
+      "category": "多言語 UTF-8 保持",
+      "description": "DEU INSERT (op:c)",
+      "expected": "Deutsch Test / Grüße aus München",
+      "actual": "Deutsch Test / Grüße aus München",
+      "status": "PASS",
+      "note": "file=event_03.json",
+      "source_file": "fixtures/putfile_samples/event_03.json"
+    },
+    {
+      "case_id": "REG-TUR",
+      "category": "多言語 UTF-8 保持",
+      "description": "TUR INSERT (op:c)",
+      "expected": "İstanbul / Türkçe karakter: ğüşıöç",
+      "actual": "İstanbul / Türkçe karakter: ğüşıöç",
+      "status": "PASS",
+      "note": "file=event_04.json",
+      "source_file": "fixtures/putfile_samples/event_04.json"
+    },
+    {
+      "case_id": "REG-USA",
+      "category": "多言語 UTF-8 保持",
+      "description": "USA INSERT (op:c)",
+      "expected": "Hello World / English mixed 123",
+      "actual": "Hello World / English mixed 123",
+      "status": "PASS",
+      "note": "file=event_05.json",
+      "source_file": "fixtures/putfile_samples/event_05.json"
+    },
+    {
+      "case_id": "DML-INS",
+      "category": "CDC DML",
+      "description": "INSERT (ID=9100)",
+      "expected": "INSERT確認",
+      "actual": "INSERT確認",
+      "status": "PASS",
+      "note": "op:c file=event_06.json",
+      "source_file": "fixtures/putfile_samples/event_06.json"
+    },
+    {
+      "case_id": "DML-UPD",
+      "category": "CDC DML",
+      "description": "UPDATE (ID=9100)",
+      "expected": "UPDATE確認",
+      "actual": "UPDATE確認",
+      "status": "PASS",
+      "note": "op:u file=event_07.json",
+      "source_file": "fixtures/putfile_samples/event_07.json"
+    },
+    {
+      "case_id": "DML-DEL",
+      "category": "CDC DML",
+      "description": "物理 DELETE (ID=9100)",
+      "expected": "before=中文测试, after=null",
+      "actual": "before='中文测试', after=None",
+      "status": "PASS",
+      "note": "op:d file=event_08.json",
+      "source_file": "fixtures/putfile_samples/event_08.json"
+    }
+  ]
+}
