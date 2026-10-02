@@ -251,7 +251,7 @@ nc -zv 10.10.2.74 50000
 
 Cloudera on Cloud の Data Hub **Flow Management** NiFi UI で以下を設定します。
 
-### 2-1. DB2 JDBC ドライバの配置
+### 2-1. DB2 JDBC ドライバの配置（インポート前の前提）
 
 CaptureChangeDebeziumDB2 は IBM JCC ドライバが必要です。**NiFi クラスタの全ノード** に同じパスで配置してください。
 
@@ -268,7 +268,70 @@ sudo chown nifi:nifi /opt/nifi/drivers/db2jcc4.jar
 
 > Data Hub では SSH 経由で各 NiFi ノードにログインし、**全ノード同一パス** に配置する必要があります。
 
-### 2-2. Controller Services の作成と有効化
+### 2-2. フローテンプレートのインポート（推奨）
+
+リポジトリ直下の **`ccsid-test.json`** に、本テスト用 NiFi プロセスグループ定義が含まれています。
+
+**含まれる構成**
+
+```
+CaptureChangeDebeziumDB2 → SplitRecord → UpdateAttribute → PutFile
+                              └ failure/original → LogAttribute（デバッグ用）
+```
+
+**NiFi DataFlow（本テスト環境）**
+
+![NiFi DataFlow — ccsid-test プロセスグループ](images/nifi-dataflow.png)
+
+| 接続元 | Relationship | 接続先 |
+|---|---|---|
+| CaptureChangeDebeziumDB2 | success | SplitRecord |
+| SplitRecord | splits | UpdateAttribute |
+| SplitRecord | failure / original | LogAttribute |
+| UpdateAttribute | success | PutFile |
+| PutFile | success / failure | LogAttribute |
+
+| 種別 | 名前 |
+|---|---|
+| プロセスグループ | `ccsid-test` |
+| プロセッサ | CaptureChangeDebeziumDB2, SplitRecord, UpdateAttribute, PutFile, LogAttribute |
+| Controller Service | EmbeddedHazelcastCacheManager, HazelcastMapCacheClient, JsonTreeReader, JsonRecordSetWriter |
+
+**インポート手順**
+
+1. NiFi UI を開く（Data Hub → Flow Management → NiFi）
+2. キャンバス上で右クリック → **Upload**（または JSON ファイルをキャンバスへドラッグ＆ドrop）
+3. `ccsid-test.json` を選択してアップロード
+4. インポートされたプロセスグループ **`ccsid-test`** を開く
+
+### 2-3. インポート後の環境依存設定
+
+テンプレートは PoC 環境の値が入っています。デプロイ先に合わせて以下を確認・変更してください。
+
+| 対象 | プロパティ | テンプレート値 | 変更が必要な場合 |
+|---|---|---|---|
+| CaptureChangeDebeziumDB2 | Host | `10.10.2.74` | EC2 のプライベート IP |
+| CaptureChangeDebeziumDB2 | Password | （未設定） | **必須**: DB2 パスワードを入力 |
+| CaptureChangeDebeziumDB2 | DB2 Driver Location(s) | `/opt/nifi/drivers/db2jcc4.jar` | JAR 配置パスが異なる場合 |
+| PutFile | Directory | `/tmp/cdc-output` | NiFi ノード上の書き込み可能パス |
+| UpdateAttribute | filename | `${UUID()}.json` | 通常は変更不要 |
+
+**Controller Services の Enable 順序**
+
+1. EmbeddedHazelcastCacheManager
+2. HazelcastMapCacheClient
+3. JsonTreeReader / JsonRecordSetWriter
+
+**プロセッサの Start 順序**
+
+1. Controller Services をすべて Enable
+2. プロセスグループ内のプロセッサを Start（CaptureChangeDebeziumDB2 は Primary Node Only / 1 min）
+
+### 2-4. 手動構築（参考）
+
+テンプレートを使わず手動で構築する場合は、以下の設定を参考にしてください。
+
+#### Controller Services の作成と有効化
 
 NiFi UI → **Controller Settings（歯車）** → **Controller Services** タブ
 
@@ -299,7 +362,7 @@ NiFi UI → **Controller Settings（歯車）** → **Controller Services** タ�
 
 **Enable の順序**: EmbeddedHazelcastCacheManager → HazelcastMapCacheClient → JsonTreeReader / JsonRecordSetWriter
 
-### 2-3. データフローの作成
+#### データフローの作成
 
 NiFi キャンバス上に以下のプロセッサを配置し、接続します。
 
@@ -316,7 +379,7 @@ CaptureChangeDebeziumDB2
 | SplitRecord | splits | UpdateAttribute |
 | UpdateAttribute | success | PutFile |
 
-### 2-4. CaptureChangeDebeziumDB2 の設定
+#### CaptureChangeDebeziumDB2 の設定
 
 | プロパティ | 設定値 | 備考 |
 |---|---|---|
@@ -353,7 +416,7 @@ CaptureChangeDebeziumDB2
 
 > **重要**: Primary Node Only は必須です。複数ノードで同時実行すると Debezium オフセットが重複します。
 
-### 2-5. SplitRecord の設定
+#### SplitRecord の設定
 
 | プロパティ | 値 |
 |---|---|
@@ -363,7 +426,7 @@ CaptureChangeDebeziumDB2
 
 CaptureChangeDebeziumDB2 は 1 FlowFile に複数 CDC イベントをまとめるため、**1 レコード = 1 FlowFile** に分割する必要があります。
 
-### 2-6. UpdateAttribute の設定
+#### UpdateAttribute の設定
 
 PutFile は **`filename` プロパティを持ちません**。FlowFile 属性 `filename` で保存名を決めます。
 
@@ -373,17 +436,17 @@ PutFile は **`filename` プロパティを持ちません**。FlowFile 属性 `
 
 > PutFile の Properties に `filename` を追加すると **Validation Error** になります。必ず UpdateAttribute で設定してください。
 
-### 2-7. PutFile の設定
+#### PutFile の設定
 
 | プロパティ | 値 |
 |---|---|
-| **Directory** | `/var/nifi/putfile/cdc-output`（NiFi ノード上の書き込み可能パス） |
-| **Conflict Resolution Strategy** | **`fail`** または **`ignore`** |
+| **Directory** | `/tmp/cdc-output`（NiFi ノード上の書き込み可能パス） |
+| **Conflict Resolution Strategy** | `fail` / `ignore` / `replace`（`${UUID()}.json` 使用時は `replace` も可） |
 | **Create Missing Directories** | `true` |
 
-> **`replace` は使わないでください。** 固定ファイル名 + replace だと最後の 1 件だけ残り、検証が失敗します。
+> UpdateAttribute で `${UUID()}.json` を設定していればファイル名はユニークです。固定ファイル名のまま `replace` にすると最後の 1 件だけ残り、検証が失敗します。
 
-### 2-8. フロー起動と動作確認
+### 2-5. フロー起動と動作確認
 
 1. Controller Services をすべて **Enable**
 2. プロセッサを **Start**
@@ -398,7 +461,7 @@ MODE=dml ./run_step1_on_ec2.sh
 
 ```bash
 # NiFi ノード上
-ls /var/nifi/putfile/cdc-output/ | wc -l   # 複数ファイルあること
+ls /tmp/cdc-output/ | wc -l   # 複数ファイルあること
 ```
 
 5. JSON の `payload.after` / `payload.before` にマルチバイト文字が正しく入っているか確認
@@ -421,7 +484,7 @@ MODE=dml ./run_step1_on_ec2.sh
 MODE=dml9100 ./run_step1_on_ec2.sh
 
 # 4. PutFile 出力を検証
-PUTFILE_DIR=/var/nifi/putfile/cdc-output MODE=verify ./run_step1_on_ec2.sh
+PUTFILE_DIR=/tmp/cdc-output MODE=verify ./run_step1_on_ec2.sh
 
 # 5. 結果確認
 cat results/step1_results.md
@@ -464,7 +527,7 @@ PutFile は NiFi ノード上に出力されます。EC2（DB2 ホスト）か�
 
 ```bash
 # NiFi ノードから EC2 へ JSON をコピー（例）
-scp nifi-node:/var/nifi/putfile/cdc-output/*.json ./cdc-output/
+scp nifi-node:/tmp/cdc-output/*.json ./cdc-output/
 
 # ローカルコピーで検証
 python3 step1_cdc_verify.py --mode verify --putfile-dir ./cdc-output
@@ -482,6 +545,18 @@ python3 step1_cdc_verify.py --mode verify --putfile-dir ./cdc-output
 | DML-DEL | ID=9100 物理 DELETE (op:d) |
 
 ---
+
+## リポジトリ構成
+
+| ファイル / ディレクトリ | 用途 |
+|---|---|
+| `ccsid-test.json` | NiFi フローテンプレート（プロセスグループ `ccsid-test`） |
+| `images/nifi-dataflow.png` | NiFi DataFlow キャプチャ（README 参照用） |
+| `step1_cdc_verify.py` | DML 投入 + PutFile JSON 検証スクリプト |
+| `run_step1_on_ec2.sh` | EC2 向け実行ラッパー |
+| `sql/` | テーブル作成・DML 用 SQL（参考） |
+| `fixtures/` | 検証用サンプル JSON |
+| `results/` | 検証結果出力 |
 
 ## 出力ファイル
 
@@ -509,7 +584,7 @@ python3 step1_cdc_verify.py --mode verify --putfile-dir ./cdc-output
 | `ASNCDC.ASNCDCSERVICES` が存在しない | 1-4 の UDF セットアップ未完了。`bldrtn` と SQL スクリプトを再実行 |
 | `asncap is not running` | `VALUES ASNCDC.ASNCDCSERVICES('start','asncdc')` を実行 |
 | NiFi から DB2 接続不可 | SG で NiFi → EC2:50000 を許可。Host に `localhost` ではなく EC2 プライベート IP を指定 |
-| PutFile に 1 ファイルしかない | SplitRecord（Records Per Split=1）と UpdateAttribute（`${UUID()}.json`）を確認。`replace` を使わない |
+| PutFile に 1 ファイルしかない | SplitRecord（Records Per Split=1）と UpdateAttribute（`${UUID()}.json`）を確認 |
 | PutFile に `filename` Validation Error | PutFile ではなく **UpdateAttribute** で `filename` を設定 |
 | verify が 9100 だけ WAIT | スナップショット完了後に `MODE=dml9100` を実行し 1〜2 分待って再 verify |
 | `SQL0803N` 主キー重複 | `MODE=dml` を再実行（冪等ロジックで自動リカバリ） |
